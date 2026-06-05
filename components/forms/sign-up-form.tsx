@@ -12,8 +12,16 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { SignUpData } from "@/lib/types/auth";
 import { SignUpSchema } from "@/lib/validations/auth";
+import { api } from "@/lib/axios";
+import { ApiResponse } from "@/lib/types/api";
+import {useState } from "react";
+import { Spinner } from "../ui/spinner";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 const SignUpForm = () => {
+    const [loading , setLoading] = useState(false);
+
     const form = useForm<SignUpData>({
         resolver: zodResolver(SignUpSchema),
         defaultValues: {
@@ -24,7 +32,23 @@ const SignUpForm = () => {
     });
 
     async function onSubmit(data: SignUpData) {
-        console.log(data);
+        try{
+            setLoading(true);
+            const response = await api.post<ApiResponse>("/auth/register", data);
+
+            console.log("Sign up successful:", response);
+            toast.success(response.data.message || "Account created successfully!");
+           
+        } catch (error: unknown) {
+          if (error instanceof AxiosError) {
+                const apiError = error.response?.data as ApiResponse;
+                toast.error(apiError.message || "An error occurred during sign up");
+          } else {
+            toast.error("An error occurred during sign up");
+            }
+        } finally {
+            setLoading(false);
+        }
     }
 
     const features = [
@@ -124,7 +148,7 @@ const SignUpForm = () => {
               <div>
                 <Input
                   type="email"
-                  placeholder="Work Email"
+                  placeholder="Email"
                   className="h-12 rounded-2xl border-border/60 bg-background/70 backdrop-blur-sm"
                   {...form.register("email")}
                 />
@@ -155,7 +179,7 @@ const SignUpForm = () => {
                 type="submit"
                 className="h-12 w-full rounded-2xl"
               >
-                Create Account
+                {loading ? <Spinner /> : "Create Account"}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">

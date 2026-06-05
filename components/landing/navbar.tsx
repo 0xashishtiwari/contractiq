@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, ShieldCheck, ExternalLink, ArrowRight } from "lucide-react";
+import {signOut , useSession} from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +16,7 @@ const navItems = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const session = useSession();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -59,10 +61,18 @@ export default function Navbar() {
             </Link>
           </Button>
           <Button asChild size="sm" className="rounded-full px-4">
-            <Link href="#cta">
-              Analyze Contract
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
+            {session.data ? (
+              <button onClick={() => signOut({
+                  callbackUrl: "/signin"
+              })}>
+                Sign Out
+              </button>
+            ) : (
+              <Link href="/signin">
+                Analyze Contract
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            )}
           </Button>
         </div>
       </div>

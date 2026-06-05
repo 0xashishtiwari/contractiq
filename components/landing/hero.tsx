@@ -56,7 +56,7 @@ export default function Hero() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="rounded-full px-6">
-                <Link href="#cta">
+                <Link href="/signin">
                   Analyze Contract
                   <ArrowRight className="ml-2 size-4" />
                 </Link>
