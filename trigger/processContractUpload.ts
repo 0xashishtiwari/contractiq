@@ -30,7 +30,7 @@ export const processContractUpload = task({
       const buffer = await readFile(contract.filePath);
       
       const text = await extractTextFromPDF(buffer);
-      console.log("Extracted text:", text);
+      
       await prisma.contract.update({
         where: { id: contractId },
         data: {
