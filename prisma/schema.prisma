@@ -13,10 +13,23 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  name    String
-  email     String   @unique
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  contracts Contract[]
+}
+
+model Contract {
+  id            String   @id @default(uuid())
+  fileName      String
+  filePath      String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  status        String   @default("pending")
+  extractedText String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -31,7 +31,7 @@ const fadeUp = {
 
 export default function Hero() {
   return (
-    <section id="top" className="section-padding relative overflow-hidden pt-10 md:pt-20">
+    <section id="top" className="section-padding relative overflow-hidden pt-0 md:pt-4">
       <div className="pointer-events-none absolute inset-0 opacity-40 hero-grid" />
       <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
       <div className="pointer-events-none absolute right-0 top-32 h-80 w-80 rounded-full bg-sky-500/10 blur-3xl" />
@@ -44,7 +44,7 @@ export default function Hero() {
           className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"
         >
           <motion.div variants={fadeUp} className="max-w-2xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur-xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-4 py-0 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur-xl">
               Durable AI workflows for legal teams
             </div>
             <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-foreground md:text-6xl lg:text-7xl">
