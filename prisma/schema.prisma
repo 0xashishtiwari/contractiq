@@ -32,4 +32,15 @@ model Contract {
   extractedText String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  clauses       Clause[]
+}
+
+model Clause {
+  id         String   @id @default(uuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id])
+  number     Int
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
