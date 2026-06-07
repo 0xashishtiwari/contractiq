@@ -3,6 +3,7 @@ import { logger } from "@trigger.dev/sdk/v3";
 import { prisma } from "@/lib/prisma";
 import {readFile} from "fs/promises";
 import {extractTextFromPDF} from "@/lib/pdf-parser";
+import { splitContractClauses } from "@/trigger/splitContractClauses";
 
 export const processContractUpload = task({
   id: "process-contract-upload",
@@ -36,6 +37,10 @@ export const processContractUpload = task({
           extractedText: text,
           status: "processed",
         },
+      });
+
+      await splitContractClauses.trigger({
+        contractId
       });
 
       logger.info("Contract processed successfully", {
