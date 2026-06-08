@@ -1,11 +1,11 @@
 import { generateObject } from 'ai'
-import { google } from '@ai-sdk/google'
+import { ollama } from 'ollama-ai-provider-v2'
 import { ClauseSchema } from './clause-schema'
-
+import {cloudfareAI} from '../cloudfare/ai';
 
 export async function splitContractIntoClauses(contractText: string) {
     const result = await generateObject({
-        model: google("gemini-3.5-flash"),
+        model: cloudfareAI('@cf/openai/gpt-oss-120b'),
         schema: ClauseSchema,
         prompt: `
 You are a legal document parser.

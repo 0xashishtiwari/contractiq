@@ -36,11 +36,21 @@ model Contract {
 }
 
 model Clause {
-  id         String   @id @default(uuid())
-  contractId String
-  contract   Contract @relation(fields: [contractId], references: [id])
-  number     Int
-  content    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(uuid())
+  contractId      String
+  contract        Contract @relation(fields: [contractId], references: [id])
+  number          Int
+  content         String
+  riskLevel       String?
+  riskExplanation String?
+  ambiguousTerms  String?
+  recommendations String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
 }

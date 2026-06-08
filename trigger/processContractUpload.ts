@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk/v3";
 import { logger } from "@trigger.dev/sdk/v3";
 import { prisma } from "@/lib/prisma";
 import {readFile} from "fs/promises";
@@ -39,13 +39,19 @@ export const processContractUpload = task({
         },
       });
 
+      logger.info("Contract processed successfully", {
+        contractId,
+      });
+      console.log("Contract processed successfully", {
+        contractId,
+      });
+      console.log(text);
+      // Trigger clause splitting as a separate task
+
       await splitContractClauses.trigger({
         contractId
       });
 
-      logger.info("Contract processed successfully", {
-        contractId,
-      });
     } catch (error) {
       await prisma.contract.update({
         where: { id: contractId },

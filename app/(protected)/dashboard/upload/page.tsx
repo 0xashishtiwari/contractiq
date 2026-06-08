@@ -8,8 +8,10 @@ import { useState } from "react";
 import {toast} from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import {api} from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 const ContractUploadPage = () => {
+  const router = useRouter();
   const [file , setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +50,8 @@ const ContractUploadPage = () => {
       if (response.success) {
         toast.success("File uploaded successfully.");
       } 
-      setFile(null);
+      
+      router.replace("/dashboard/upload");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
