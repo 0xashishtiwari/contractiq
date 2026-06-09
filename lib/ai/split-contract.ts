@@ -1,5 +1,4 @@
 import { generateObject } from 'ai'
-import { ollama } from 'ollama-ai-provider-v2'
 import { ClauseSchema } from './clause-schema'
 import {cloudfareAI} from '../cloudfare/ai';
 

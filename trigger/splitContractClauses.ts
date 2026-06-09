@@ -2,6 +2,9 @@ import { task } from "@trigger.dev/sdk/v3";
 import { splitContractIntoClauses } from "@/lib/ai/split-contract";
 import { prisma } from "@/lib/prisma";
 import { analyseClauseTask } from "./analyseClause";
+import { logger } from "@trigger.dev/sdk/v3";
+import {wait} from "@trigger.dev/sdk/v3";
+import { sendEmail } from "@/lib/email/sendEmail";
 
 export const splitContractClauses = task({
     id: "split-contract-clauses",
@@ -72,9 +75,78 @@ export const splitContractClauses = task({
                 console.log(`Triggered analysis for clause ${clause.id}`);
             }
 
+            const clauseAfterAnalysis = await prisma.clause.findMany({
+                where: { contractId },
+            });
+
+            const order = {
+                HIGH: 1,
+                MEDIUM: 2,
+                LOW: 3
+            }
+            // Sort clauses by risk level: HIGH first, then MEDIUM, then LOW, and finally those without a risk level
+            const sortedClauses = clauseAfterAnalysis.sort((a, b) => {
+                const riskA = a.riskLevel ? order[a.riskLevel as keyof typeof order] : 4;
+                const riskB = b.riskLevel ? order[b.riskLevel as keyof typeof order] : 4;
+                return riskA - riskB;
+            });
+
+            const report = {
+                summary: {
+                    totalClauses: sortedClauses.length,
+                    highRisk: sortedClauses.filter(c => c.riskLevel === "HIGH").length,
+                    mediumRisk: sortedClauses.filter(c => c.riskLevel === "MEDIUM").length,
+                    lowRisk: sortedClauses.filter(c => c.riskLevel === "LOW").length,
+                },
+                clauses: sortedClauses
+
+            }
+
+            await prisma.contract.update({
+                where: { id: contractId },
+                data: {
+                    report: report,
+                    status: "Waiting for Review"
+                }
+
+            });
+
+            // Generate a review token for the contract
+            const token = await wait.createToken({
+                timeout : '30d', 
+            });
+
+
+            // Save the token in the contract for later verification
+            await prisma.contract.update({
+                where: { id: contractId },
+                data: {
+                    reviewTokenId: token.id
+                }
+            })
+
+            //Email the user with the review link
+            const contractWithUser = await prisma.contract.findUnique({
+                where: { id: contractId },
+                include: { user: true }
+            });
+
+            const reviewLink = `${process.env.FRONTEND_URL}/review/${contractId}`;
+            logger.info("Contract ready for review", {
+                contractId,
+                reviewLink
+            })
+
+            // send email to user with review link using resend
+            await sendEmail(contractWithUser , report , reviewLink);
+
+
+            await wait.forToken(token.id)
+
         } catch (error) {
             throw new Error("Failed to split contract clauses");
         }
+
 
     }
 })

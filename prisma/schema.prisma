@@ -30,6 +30,8 @@ model Contract {
   user          User     @relation(fields: [userId], references: [id])
   status        String   @default("pending")
   extractedText String?
+  reviewTokenId String?
+  report        Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   clauses       Clause[]
@@ -41,10 +43,15 @@ model Clause {
   contract        Contract @relation(fields: [contractId], references: [id])
   number          Int
   content         String
-  riskLevel       String?
+  riskLevel       RiskLevel @default(LOW)
   riskExplanation String?
   ambiguousTerms  String?
   recommendations String?
+
+  reviewStatus     String   @default("pending")
+  reviewNote      String?
+  reviewedAt      DateTime?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

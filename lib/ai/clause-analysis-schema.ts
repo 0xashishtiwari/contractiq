@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const ClauseAnalysisSchema = z.object({
-    riskLevel: z.enum(["Low", "Medium", "High"]),
+    riskLevel: z.enum(["LOW", "MEDIUM", "HIGH"]),
     riskExplanation: z.string(),
     ambiguousTerms: z.array(z.string()),
     recommendations : z.string()
