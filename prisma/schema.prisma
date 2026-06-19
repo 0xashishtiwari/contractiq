@@ -48,7 +48,7 @@ model Clause {
   ambiguousTerms  String?
   recommendations String?
 
-  reviewStatus     String   @default("pending")
+  reviewStatus     ReviewStatus @default(PENDING)
   reviewNote      String?
   reviewedAt      DateTime?
 
@@ -60,4 +60,10 @@ enum RiskLevel {
   LOW
   MEDIUM
   HIGH
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

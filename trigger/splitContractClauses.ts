@@ -131,7 +131,7 @@ export const splitContractClauses = task({
                 include: { user: true }
             });
 
-            const reviewLink = `${process.env.FRONTEND_URL}/review/${contractId}`;
+            const reviewLink = `${process.env.FRONTEND_URL}/dashboard/contracts/${contractId}/review`;
             logger.info("Contract ready for review", {
                 contractId,
                 reviewLink
@@ -141,7 +141,11 @@ export const splitContractClauses = task({
             await sendEmail(contractWithUser , report , reviewLink);
 
 
-            await wait.forToken(token.id)
+           const reviewResult =  await wait.forToken(token.id)
+           logger.info("Review completed", {
+            contractId,
+            reviewResult
+           }) 
 
         } catch (error) {
             throw new Error("Failed to split contract clauses");
