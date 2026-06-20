@@ -1,12 +1,17 @@
-import React from 'react'
-import Navbar from '@/components/landing/navbar';
 
-const page = () => {
+import Navbar from "@/components/landing/navbar";
+import {getUserContracts} from "@/app/actions/userContract";
+import DashBoardClient from "./DashBoardClient";
+
+
+
+
+export default async function DashboardPage() {
+
+  const contracts = await getUserContracts();
   return (
-    <div>
-        <Navbar/>
-        page</div>
-  )
+    <>
+      <DashBoardClient contracts={contracts} />
+    </>
+  );
 }
-
-export default page
