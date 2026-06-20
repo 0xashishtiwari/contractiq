@@ -3,8 +3,9 @@ import { splitContractIntoClauses } from "@/lib/ai/split-contract";
 import { prisma } from "@/lib/prisma";
 import { analyseClauseTask } from "./analyseClause";
 import { logger } from "@trigger.dev/sdk/v3";
-import {wait} from "@trigger.dev/sdk/v3";
+import { wait } from "@trigger.dev/sdk/v3";
 import { sendEmail } from "@/lib/email/sendEmail";
+import { generateFinalSummaryTask } from "./generateSummary";
 
 export const splitContractClauses = task({
     id: "split-contract-clauses",
@@ -113,7 +114,7 @@ export const splitContractClauses = task({
 
             // Generate a review token for the contract
             const token = await wait.createToken({
-                timeout : '30d', 
+                timeout: '30d',
             });
 
 
@@ -138,16 +139,34 @@ export const splitContractClauses = task({
             })
 
             // send email to user with review link using resend
-            await sendEmail(contractWithUser , report , reviewLink);
+            await sendEmail(contractWithUser, report, reviewLink);
 
 
-           const reviewResult =  await wait.forToken(token.id)
-           logger.info("Review completed", {
-            contractId,
-            reviewResult
-           }) 
+            const reviewResult = await wait.forToken(token.id)
+            logger.info("Review completed", {
+                contractId,
+                reviewResult
+            })
+
+
+            logger.info("Final summary generation triggered", {
+                contractId
+            })
+
+
+            await generateFinalSummaryTask.triggerAndWait({
+                contractId
+            })
+
+            logger.info("Final summary generation completed", {
+                contractId
+            })
 
         } catch (error) {
+            logger.error("Failed to split contract clauses", {
+                contractId,
+                error
+            });
             throw new Error("Failed to split contract clauses");
         }
 
