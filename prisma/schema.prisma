@@ -23,25 +23,26 @@ model User {
 }
 
 model Contract {
-  id            String   @id @default(uuid())
-  fileName      String
-  filePath      String
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
-  status        String   @default("pending")
-  extractedText String?
-  reviewTokenId String?
-  finalSummary   Json?
-  report        Json?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  clauses       Clause[]
+  id                     String   @id @default(uuid())
+  fileName               String
+  filePath               String
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id])
+  status                 String   @default("pending")
+  extractedText          String?
+  reviewTokenId          String?
+  summaryGenerationRunId String?
+  finalSummary           Json?
+  report                 Json?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  clauses                Clause[]
 }
 
 model Clause {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   contractId      String
-  contract        Contract @relation(fields: [contractId], references: [id])
+  contract        Contract  @relation(fields: [contractId], references: [id])
   number          Int
   content         String
   riskLevel       RiskLevel @default(LOW)
@@ -49,12 +50,12 @@ model Clause {
   ambiguousTerms  String?
   recommendations String?
 
-  reviewStatus     ReviewStatus @default(PENDING)
-  reviewNote      String?
-  reviewedAt      DateTime?
+  reviewStatus ReviewStatus @default(PENDING)
+  reviewNote   String?
+  reviewedAt   DateTime?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum RiskLevel {

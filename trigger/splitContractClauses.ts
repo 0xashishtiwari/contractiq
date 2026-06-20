@@ -154,9 +154,17 @@ export const splitContractClauses = task({
             })
 
 
-            await generateFinalSummaryTask.triggerAndWait({
+          const handle = await generateFinalSummaryTask.triggerAndWait({
                 contractId
             })
+
+            // save the runid to db for frontend to check the status of summary generation
+            await prisma.contract.update({
+                where: { id: contractId },
+                data: {
+                    summaryGenerationRunId: handle.id
+                }
+             })
 
             logger.info("Final summary generation completed", {
                 contractId
