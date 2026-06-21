@@ -154,7 +154,7 @@ export const splitContractClauses = task({
             })
 
 
-          const handle = await generateFinalSummaryTask.triggerAndWait({
+          const handle = await generateFinalSummaryTask.trigger({
                 contractId
             })
 
