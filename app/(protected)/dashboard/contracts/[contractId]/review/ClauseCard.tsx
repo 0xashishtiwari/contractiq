@@ -20,8 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { updateClauseReview } from '@/app/actions/review';
-import {useEffect} from "react";
-
+import { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 type ClauseCardProps = {
   clause: {
     id: string;
@@ -36,6 +37,37 @@ type ClauseCardProps = {
   };
 };
 
+function parseList(text: string | null): string[] {
+  if (!text) return [];
+
+  // Try JSON first
+  try {
+    const parsed = JSON.parse(text);
+
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch {
+    // Ignore JSON parsing errors
+  }
+
+  // Fallback: split by new lines
+  return text
+    .split("\n")
+    .map((item) => item.replace(/^[-*]\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function parseRecommendations(text: string | null): string[] {
+  if (!text) return [];
+
+  return text
+    .split(/\n|\d+\.\s/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+
 export default function ClauseCard({ clause }: ClauseCardProps) {
   const [status, setStatus] = React.useState(clause.reviewStatus);
   const [note, setNote] = React.useState(clause.reviewNote || "");
@@ -44,28 +76,31 @@ export default function ClauseCard({ clause }: ClauseCardProps) {
     clause.riskLevel === "HIGH"
       ? "border-red-500/20 bg-red-500/10 text-red-400"
       : clause.riskLevel === "MEDIUM"
-      ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
-      : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
+        ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
+        : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
 
   const statusClass =
     status === "APPROVED"
       ? "border-green-500/20 bg-green-500/10 text-green-400"
       : status === "REJECTED"
-      ? "border-red-500/20 bg-red-500/10 text-red-400"
-      : "border-amber-500/20 bg-amber-500/10 text-amber-400";
+        ? "border-red-500/20 bg-red-500/10 text-red-400"
+        : "border-amber-500/20 bg-amber-500/10 text-amber-400";
 
 
-        // auto save review status and note when they change
-    useEffect(() => {
-      const timer = setTimeout(async () => {
-        // only send a single payload object to match updateClauseReview signature
-        if (status !== clause.reviewStatus || note !== clause.reviewNote) {
-          await updateClauseReview({ clauseId: clause.id, reviewStatus: status, reviewNote: note });
-        }
-      }, 3000); // debounce by 3 seconds
+  // auto save review status and note when they change
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      // only send a single payload object to match updateClauseReview signature
+      if (status !== clause.reviewStatus || note !== clause.reviewNote) {
+        await updateClauseReview({ clauseId: clause.id, reviewStatus: status, reviewNote: note });
+      }
+    }, 3000); // debounce by 3 seconds
 
-      return () => clearTimeout(timer);
-    }, [status, note, clause.id, clause.reviewStatus, clause.reviewNote]);
+    return () => clearTimeout(timer);
+  }, [status, note, clause.id, clause.reviewStatus, clause.reviewNote]);
+
+  const ambiguousTermsList = parseList(clause.ambiguousTerms);
+  const recommendationsList = parseRecommendations(clause.recommendations);
 
   return (
     <Card className="glass-card glow-border relative mx-auto mb-6 w-full max-w-7xl overflow-hidden rounded-[2rem] border border-border/60">
@@ -153,26 +188,81 @@ export default function ClauseCard({ clause }: ClauseCardProps) {
             </h3>
           </div>
 
-          <p className="leading-7 text-foreground">
-            {clause.ambiguousTerms || "No ambiguous terms detected."}
-          </p>
+          {ambiguousTermsList.length > 0 ? (
+            <ul className="list-disc space-y-2 pl-5">
+              {ambiguousTermsList.map((term, index) => (
+                <li key={index} className="leading-7 text-foreground">
+                  {term}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No ambiguous terms detected.</p>
+          )}
         </section>
 
         {/* Recommendations */}
         <section className="rounded-2xl border border-border/60 bg-background/50 p-6 backdrop-blur-sm transition-colors hover:bg-background/70">
-          <div className="mb-3 flex items-center gap-2">
-            <Lightbulb className="size-4 text-violet-400" />
+  <div className="mb-3 flex items-center gap-2">
+    <Lightbulb className="size-4 text-violet-400" />
 
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Recommendations
-            </h3>
-          </div>
+    <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      Recommendations
+    </h3>
+  </div>
 
-          <p className="leading-7 text-foreground">
-            {clause.recommendations ||
-              "No recommendations were generated."}
-          </p>
-        </section>
+  {clause.recommendations ? (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => (
+          <h1 className="mb-3 text-xl font-bold">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="mb-3 text-lg font-semibold">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="mb-2 text-base font-semibold">{children}</h3>
+        ),
+        p: ({ children }) => (
+          <p className="mb-3 leading-7 text-foreground">{children}</p>
+        ),
+        ul: ({ children }) => (
+          <ul className="mb-4 list-disc space-y-2 pl-6">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="mb-4 list-decimal space-y-3 pl-6">
+            {children}
+          </ol>
+        ),
+        li: ({ children }) => (
+          <li className="leading-7">{children}</li>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-foreground">
+            {children}
+          </strong>
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-4 border-primary pl-4 italic">
+            {children}
+          </blockquote>
+        ),
+        code: ({ children }) => (
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">
+            {children}
+          </code>
+        ),
+      }}
+    >
+      {clause.recommendations}
+    </ReactMarkdown>
+  ) : (
+    <p>No recommendations were generated.</p>
+  )}
+</section>
 
         {/* Human Review */}
         <section className="rounded-2xl border border-border/60 bg-background/50 p-6 backdrop-blur-sm transition-colors hover:bg-background/70">

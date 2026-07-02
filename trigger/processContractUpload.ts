@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import {readFile} from "fs/promises";
 import {extractTextFromPDF} from "@/lib/pdf-parser";
 import { splitContractClauses } from "@/trigger/splitContractClauses";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import s3client from "@/lib/s3";
 
 export const processContractUpload = task({
   id: "process-contract-upload",
@@ -27,8 +29,24 @@ export const processContractUpload = task({
     });
 
     try {
-      const buffer = await readFile(contract.filePath);
+      // Download the file from S3
+      const response = await s3client.send(new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: contract.filePath,  // this should be the S3 key stored in the database
+      }));
       
+      if(!response.Body) {
+        throw new Error("Failed to download file from S3");
+      }
+
+      const chunk : Uint8Array[] = [];
+
+      for await (const c of response.Body as AsyncIterable<Uint8Array>) {
+        chunk.push(c);
+      }
+
+      const buffer = Buffer.concat(chunk);
+
       const text = await extractTextFromPDF(buffer);
       
       await prisma.contract.update({

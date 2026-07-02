@@ -9,6 +9,7 @@ import {
   RefreshCcw,
   Layers3,
 } from "lucide-react";
+import {Variants} from "framer-motion";
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -45,16 +46,16 @@ const features = [
   },
 ];
 
-const gridVariants = {
+const gridVariants : Variants = {
   hidden: {},
   show: {
     transition: { staggerChildren: 0.09 },
   },
 };
 
-const cardVariants = {
+const cardVariants : Variants = {
   hidden: { opacity: 0, y: 26, scale: 0.98 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: "easeOut" as const } },
 };
 
 export default function Features() {

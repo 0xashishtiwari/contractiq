@@ -1,10 +1,11 @@
-import { mkdir, writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import path from "path";
 import { prisma } from "@/lib/prisma";
 import { auth } from '@/auth';
 import { processContractUpload } from '@/trigger/processContractUpload'
+import {PutObjectCommand} from "@aws-sdk/client-s3";
+import s3client from "@/lib/s3";
+
 export async function POST(request: Request) {
     const session = await auth();
 
@@ -28,18 +29,29 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadDir = path.join(process.cwd(), "uploads");
-    await mkdir(uploadDir, { recursive: true });
+    const key = `contracts/${uuidv4()}-${file.name}`;
 
-    const filePath = path.join(uploadDir, `${uuidv4()}-${file.name}`);
-    await writeFile(filePath, buffer);
+    const command = new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type || 'application/pdf'
+    });
+
+    try{
+        await s3client.send(command);
+
+    }catch (error){
+        console.error("Error uploading file to S3:", error);
+
+    }
 
     const contract = await prisma.contract.create({
         data: {
             id: uuidv4(),
             userId: session.user.id,
             fileName: file.name,
-            filePath: filePath,
+            filePath: key,  // store the S3 key instead of the local path
             status: "uploaded",
         }
     })

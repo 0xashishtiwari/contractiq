@@ -49,5 +49,5 @@ export default async function Page({
         }
     })
 
-    return <SummaryViewer runId={contract.summaryGenerationRunId} accessToken={accessToken} initialSummary={contract.finalSummary} />;
+    return <SummaryViewer runId={contract.summaryGenerationRunId} accessToken={accessToken} initialSummary={contract.finalSummary ?? "No summary available."} />;
 }

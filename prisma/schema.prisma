@@ -32,7 +32,7 @@ model Contract {
   extractedText          String?
   reviewTokenId          String?
   summaryGenerationRunId String?
-  finalSummary           Json?
+  finalSummary           String?
   report                 Json?
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion  , type Variants} from "framer-motion";
 import { ArrowRight, CheckCircle2, FileText, ScanText, ShieldAlert, Sparkles, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ const containerVariants = {
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as const, } },
 };
 
 export default function Hero() {

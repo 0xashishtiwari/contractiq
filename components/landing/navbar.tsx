@@ -8,11 +8,7 @@ import {signOut , useSession} from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 
-const navItems = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "GitHub", href: "https://github.com" },
-];
+
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -29,7 +25,7 @@ export default function Navbar() {
     <motion.header
       initial={{ opacity: 0, y: -18 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: "easeOut" as const }}
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${scrolled ? "border-border/60 bg-background/80 backdrop-blur-xl" : "border-transparent bg-background/40 backdrop-blur-md"}`}
     >
       <div className="section-container flex h-20 items-center justify-between gap-6">
@@ -41,7 +37,7 @@ export default function Navbar() {
           <span className="text-lg font-semibold tracking-tight text-foreground">ContractIQ</span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* <nav className="hidden items-center gap-8 md:flex">
           {navItems.map((item) => (
             <Link
               key={item.label}
@@ -51,7 +47,7 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-        </nav>
+        </nav> */}
 
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
